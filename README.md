@@ -1,6 +1,12 @@
-# Mensago API
+<h1 align="center">Mensago API</h1>
 
-Serviço centralizado para criação, processamento e acompanhamento de campanhas de e-mail em lote.
+<p align="center">
+  Serviço centralizado para criação, processamento e acompanhamento de campanhas de e-mail em lote.
+</p>
+
+<p align="center">
+  <strong>Go · PostgreSQL · Keycloak · Workers · Provedores de e-mail</strong>
+</p>
 
 O Mensago API permite que diferentes aplicações solicitem o envio de uma campanha por meio de uma API, sem precisar enviar cada mensagem individualmente ou manter regras próprias de fila, tentativas e integração com provedores de e-mail.
 
@@ -31,7 +37,11 @@ O Mensago API concentra essas responsabilidades em um único serviço assíncron
 
 ## Arquitetura
 
-![Arquitetura inicial do Mensago API](docs/images/architecture.png)
+<p align="center">
+  <img src="./docs/images/architecture.png" alt="Arquitetura inicial do Mensago API" width="900">
+</p>
+
+<p align="center"><em>Visão inicial da comunicação entre aplicações, API, autenticação, banco, worker e provedor de e-mail.</em></p>
 
 ### Componentes
 
