@@ -47,9 +47,6 @@ func Test_Create_ValidateDomainError(t *testing.T) {
 	invalidCampaign := newCampaign
 	invalidCampaign.Name = ""
 
-	repositoryMock := new(repositoryMock)
-	service := Service{Repository: repositoryMock}
-
 	_, err := service.Create(invalidCampaign)
 
 	assert.NotNil(err)
@@ -57,9 +54,8 @@ func Test_Create_ValidateDomainError(t *testing.T) {
 }
 
 func Test_Create_SaveCampaign(t *testing.T) {
-	repositoryMock := new(repositoryMock)
 
-	repositoryMock.On("Save", mock.MatchedBy(func(campaign *Campaign) bool {
+	repository.On("Save", mock.MatchedBy(func(campaign *Campaign) bool {
 		if campaign.Name != newCampaign.Name ||
 			campaign.Content != newCampaign.Content ||
 			len(campaign.Contacts) != len(newCampaign.Emails) {
@@ -68,10 +64,9 @@ func Test_Create_SaveCampaign(t *testing.T) {
 
 		return true
 	})).Return(nil)
-	service := Service{Repository: repositoryMock}
 	service.Create(newCampaign)
 
-	repositoryMock.AssertExpectations(t)
+	repository.AssertExpectations(t)
 }
 
 func Test_Create_ValidateRepositorySave(t *testing.T) {
