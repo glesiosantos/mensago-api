@@ -10,5 +10,6 @@ type Service struct {
 
 func (s *Service) CreateCampaign(c contract.NewCampaignDto) (string, error) {
 	campaign, _ := NewCampaign(c.Name, c.Content, c.Emails)
+	s.Repository.Save(campaign)
 	return campaign.Id, nil
 }
