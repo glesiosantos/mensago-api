@@ -3,6 +3,7 @@ package campaign
 import (
 	"errors"
 	"mensago-api/internal/contract"
+	"mensago-api/internal/domain/utils"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -75,5 +76,6 @@ func Test_Create_ValidateRepositorySave(t *testing.T) {
 	repositoryMock.On("Save", mock.Anything).Return(errors.New("error to save on database"))
 	service := Service{Repository: repositoryMock}
 	_, err := service.Create(newCampaign)
-	assert.Equal("error to save on database", err.Error())
+	assert.True(errors.Is(utils.ServerError, err))
+	// assert.Equal("error to save on database", err.Error())
 }

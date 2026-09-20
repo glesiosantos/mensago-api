@@ -2,6 +2,7 @@ package campaign
 
 import (
 	"mensago-api/internal/contract"
+	"mensago-api/internal/domain/utils"
 )
 
 type Service struct {
@@ -16,7 +17,7 @@ func (s *Service) Create(newCampaign contract.NewCampaignDto) (string, error) {
 	}
 	err = s.Repository.Save(campaign)
 	if err != nil {
-		return "", err
+		return "", utils.ServerError
 	}
 
 	return campaign.Id, nil
