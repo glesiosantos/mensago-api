@@ -1,15 +1,45 @@
 package campaign
 
-import "time"
+import (
+	"mensago-api/internal/utils"
+	"time"
 
-type Contacts struct {
-	Email string
+	"github.com/google/uuid"
+)
+
+type Contact struct {
+	Email string `validate:"email"`
 }
 
 type Campaign struct {
-	Id        string
-	Name      string
-	Content   string
-	Contacts  []Contacts
-	CreatedAt time.Time
+	Id        string    `validate:"required"`
+	Name      string    `validate:"min=5,max=100"`
+	Content   string    `validate:"min=5,max=1024"`
+	Contacts  []Contact `validate:"min=1,dive"`
+	CreatedAt time.Time `validate:"required"`
+}
+
+func NewCampaign(name string, content string, emails []string) (*Campaign, error) {
+
+	contacts := make([]Contact, len(emails))
+
+	for index, email := range emails {
+		contacts[index].Email = email
+	}
+
+	campaign := &Campaign{
+		Id:        uuid.NewString(),
+		Name:      name,
+		Content:   content,
+		Contacts:  contacts,
+		CreatedAt: time.Now(),
+	}
+
+	err := utils.ValidatorStruct(campaign)
+
+	if err == nil {
+		return campaign, nil
+	}
+
+	return nil, err
 }
