@@ -1,22 +1,21 @@
 package campaign
 
 import (
-	"errors"
 	"time"
 
 	"github.com/google/uuid"
 )
 
 type Contact struct {
-	Email string
+	Email string `validate:"email"`
 }
 
 type Campaign struct {
-	Id        string
-	Name      string
-	Content   string
-	Contacts  []Contact
-	CreatedAt time.Time
+	Id        string    `validate:"required"`
+	Name      string    `validate:"min=5,max=100"`
+	Content   string    `validate:"min=5,max=1024"`
+	Contacts  []Contact `validate:"min=1,dive"`
+	CreatedAt time.Time `validate:"required"`
 }
 
 func NewCampaign(name string, content string, emails []string) (*Campaign, error) {
@@ -25,14 +24,6 @@ func NewCampaign(name string, content string, emails []string) (*Campaign, error
 
 	for index, email := range emails {
 		contacts[index].Email = email
-	}
-
-	if name == "" {
-		return nil, errors.New("name is required")
-	} else if content == "" {
-		return nil, errors.New("content is required")
-	} else if len(emails) == 0 {
-		return nil, errors.New("contacts is required")
 	}
 
 	return &Campaign{
