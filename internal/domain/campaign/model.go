@@ -1,6 +1,7 @@
 package campaign
 
 import (
+	"mensago-api/internal/utils"
 	"time"
 
 	"github.com/google/uuid"
@@ -26,11 +27,19 @@ func NewCampaign(name string, content string, emails []string) (*Campaign, error
 		contacts[index].Email = email
 	}
 
-	return &Campaign{
+	campaign := &Campaign{
 		Id:        uuid.NewString(),
 		Name:      name,
 		Content:   content,
 		Contacts:  contacts,
 		CreatedAt: time.Now(),
-	}, nil
+	}
+
+	err := utils.ValidatorStruct(campaign)
+
+	if err == nil {
+		return campaign, nil
+	}
+
+	return nil, err
 }

@@ -2,7 +2,7 @@ package campaign
 
 import (
 	"mensago-api/internal/contract"
-	"mensago-api/internal/domain/utils"
+	"mensago-api/internal/utils"
 )
 
 type Service struct {

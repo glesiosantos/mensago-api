@@ -2,12 +2,13 @@ package campaign
 
 import (
 	"errors"
-	"mensago-api/internal/contract"
-	"mensago-api/internal/domain/utils"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"mensago-api/internal/contract"
+	"mensago-api/internal/utils"
+
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 )
 
 type repositoryMock struct {
@@ -19,63 +20,79 @@ func (r *repositoryMock) Save(campaign *Campaign) error {
 	return args.Error(0)
 }
 
-var (
-	newCampaign = contract.NewCampaignDto{
-		Name:    "Test Y",
-		Content: "Body",
-		Emails:  []string{"teste1@test.com"},
-	}
-	repository = new(repositoryMock)
-	service    = Service{Repository: repository}
-)
+var newCampaign = contract.NewCampaignDto{
+	Name:    "Test Y",
+	Content: "Body valid", // mínimo de 5 caracteres
+	Emails:  []string{"teste1@test.com"},
+}
 
 func Test_Create_Campaign(t *testing.T) {
-	assert := assert.New(t)
+	repository := new(repositoryMock)
+	service := Service{Repository: repository}
 
 	repository.
-		On("Save", mock.Anything).
-		Return(nil)
+		On("Save", mock.AnythingOfType("*campaign.Campaign")).
+		Return(nil).
+		Once()
 
 	id, err := service.Create(newCampaign)
 
-	assert.NotNil(id)
-	assert.Nil(err)
+	require.NoError(t, err)
+	require.NotEmpty(t, id)
+	repository.AssertExpectations(t)
 }
 
 func Test_Create_ValidateDomainError(t *testing.T) {
-	assert := assert.New(t)
+	repository := new(repositoryMock)
+	service := Service{Repository: repository}
 
 	invalidCampaign := newCampaign
 	invalidCampaign.Name = ""
 
-	_, err := service.Create(invalidCampaign)
+	id, err := service.Create(invalidCampaign)
 
-	assert.NotNil(err)
-	assert.Equal("name is required", err.Error())
+	require.Error(t, err)
+	require.Empty(t, id)
+	require.EqualError(t, err, "name is required with min 5")
+
+	// O repositório não deve ser chamado quando o domínio é inválido.
+	repository.AssertNotCalled(t, "Save", mock.Anything)
 }
 
 func Test_Create_SaveCampaign(t *testing.T) {
+	repository := new(repositoryMock)
+	service := Service{Repository: repository}
 
-	repository.On("Save", mock.MatchedBy(func(campaign *Campaign) bool {
-		if campaign.Name != newCampaign.Name ||
-			campaign.Content != newCampaign.Content ||
-			len(campaign.Contacts) != len(newCampaign.Emails) {
-			return false
-		}
+	repository.
+		On("Save", mock.MatchedBy(func(campaign *Campaign) bool {
+			return campaign != nil &&
+				campaign.Name == newCampaign.Name &&
+				campaign.Content == newCampaign.Content &&
+				len(campaign.Contacts) == len(newCampaign.Emails)
+		})).
+		Return(nil).
+		Once()
 
-		return true
-	})).Return(nil)
-	service.Create(newCampaign)
+	id, err := service.Create(newCampaign)
 
+	require.NoError(t, err)
+	require.NotEmpty(t, id)
 	repository.AssertExpectations(t)
 }
 
 func Test_Create_ValidateRepositorySave(t *testing.T) {
-	assert := assert.New(t)
-	repositoryMock := new(repositoryMock)
-	repositoryMock.On("Save", mock.Anything).Return(errors.New("error to save on database"))
-	service := Service{Repository: repositoryMock}
-	_, err := service.Create(newCampaign)
-	assert.True(errors.Is(utils.ServerError, err))
-	// assert.Equal("error to save on database", err.Error())
+	repository := new(repositoryMock)
+	service := Service{Repository: repository}
+
+	repository.
+		On("Save", mock.AnythingOfType("*campaign.Campaign")).
+		Return(errors.New("error to save on database")).
+		Once()
+
+	id, err := service.Create(newCampaign)
+
+	require.Error(t, err)
+	require.Empty(t, id)
+	require.ErrorIs(t, err, utils.ServerError)
+	repository.AssertExpectations(t)
 }

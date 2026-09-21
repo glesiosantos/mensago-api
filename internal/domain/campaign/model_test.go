@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	name     = "Nova campanha X"
-	content  = "Corpo da Campanha"
+	name     = "Nova campanha X fds"
+	content  = "Corpo da Campanha para teste"
 	contacts = []string{"email1@test.com.br", "email2@test.com"}
 )
 
@@ -33,17 +33,17 @@ func Test_NewCampaign_MustValidateName(t *testing.T) {
 	assert := assert.New(t)
 	_, err := NewCampaign("", content, contacts)
 
-	assert.Equal("name is required", err.Error())
+	assert.Equal("name is required with min 5", err.Error())
 }
 
 func Test_NewCampaign_MustValidateContent(t *testing.T) {
 	assert := assert.New(t)
 	_, err := NewCampaign(name, "", contacts)
-	assert.Equal("content is required", err.Error())
+	assert.Equal("content is required with min 5", err.Error())
 }
 
 func Test_NewCampaign_MustValidateContact(t *testing.T) {
 	assert := assert.New(t)
 	_, err := NewCampaign(name, content, []string{})
-	assert.Equal("contacts is required", err.Error())
+	assert.Equal("contacts is required with min 1", err.Error())
 }
