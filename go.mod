@@ -3,6 +3,7 @@ module mensago-api
 go 1.26.5
 
 require (
+	github.com/brianvoe/gofakeit/v7 v7.17.1
 	github.com/go-playground/validator/v10 v10.30.5
 	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.12.1

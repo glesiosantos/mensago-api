@@ -4,46 +4,58 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/brianvoe/gofakeit/v7"
+	"github.com/stretchr/testify/require"
 )
 
 var (
-	name     = "Nova campanha X fds"
-	content  = "Corpo da Campanha para teste"
-	contacts = []string{"email1@test.com.br", "email2@test.com"}
+	fake = gofakeit.New(12345)
+
+	name     = fake.Sentence(3)
+	content  = fake.Paragraph(1, 2, 5, " ")
+	contacts = []string{
+		fake.Email(),
+		fake.Email(),
+	}
 )
 
-func Test_NewCampaign_CreateCampanign(t *testing.T) {
-	assert := assert.New(t)
-	campaign, _ := NewCampaign(name, content, contacts)
-	assert.NotEmpty(t, campaign.Id)
-	assert.Equal(campaign.Name, name)
-	assert.Equal(len(campaign.Contacts), len(contacts))
+func TestNewCampaign_CreateCampaign(t *testing.T) {
+	campaign, err := NewCampaign(name, content, contacts)
+
+	require.NoError(t, err)
+	require.NotNil(t, campaign)
+	require.NotEmpty(t, campaign.Id)
+	require.Equal(t, name, campaign.Name)
+	require.Len(t, campaign.Contacts, len(contacts))
 }
 
-func Test_NewCampaign_CreatedOnMustBeNow(t *testing.T) {
-	assert := assert.New(t)
+func TestNewCampaign_CreatedOnMustBeNow(t *testing.T) {
 	now := time.Now().Add(-time.Minute)
-	campaign, _ := NewCampaign(name, content, contacts)
 
-	assert.Greater(campaign.CreatedAt, now)
+	campaign, err := NewCampaign(name, content, contacts)
+
+	require.NoError(t, err)
+	require.NotNil(t, campaign)
+	require.Greater(t, campaign.CreatedAt, now)
 }
 
-func Test_NewCampaign_MustValidateName(t *testing.T) {
-	assert := assert.New(t)
-	_, err := NewCampaign("", content, contacts)
+func TestNewCampaign_MustValidateName(t *testing.T) {
+	campaign, err := NewCampaign("", content, contacts)
 
-	assert.Equal("name is required with min 5", err.Error())
+	require.Nil(t, campaign)
+	require.EqualError(t, err, "name is required with min 5")
 }
 
-func Test_NewCampaign_MustValidateContent(t *testing.T) {
-	assert := assert.New(t)
-	_, err := NewCampaign(name, "", contacts)
-	assert.Equal("content is required with min 5", err.Error())
+func TestNewCampaign_MustValidateContent(t *testing.T) {
+	campaign, err := NewCampaign(name, "", contacts)
+
+	require.Nil(t, campaign)
+	require.EqualError(t, err, "content is required with min 5")
 }
 
-func Test_NewCampaign_MustValidateContact(t *testing.T) {
-	assert := assert.New(t)
-	_, err := NewCampaign(name, content, []string{})
-	assert.Equal("contacts is required with min 1", err.Error())
+func TestNewCampaign_MustValidateContacts(t *testing.T) {
+	campaign, err := NewCampaign(name, content, []string{})
+
+	require.Nil(t, campaign)
+	require.EqualError(t, err, "contacts is required with min 1")
 }
