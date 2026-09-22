@@ -1,32 +1,63 @@
 package main
 
 import (
-	"mensago-api/internal/domain/campaign"
-	"time"
+	"net/http"
 
-	"github.com/go-playground/validator/v10"
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/render"
 )
 
+type Product struct {
+	Id          string
+	Description string
+}
+
 func main() {
-	contacts := []campaign.Contact{{Email: "teste@gmail.com"}}
-	campaign := campaign.Campaign{
-		Id:        "01",
-		Name:      "Teste de Campanha",
-		Content:   "Criando uma nova campanha",
-		Contacts:  contacts,
-		CreatedAt: time.Now(),
-	}
-	validate := validator.New()
+	r := chi.NewRouter()
+	r.Use(middleware.RequestID)
+	r.Use(middleware.RealIP)
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
 
-	err := validate.Struct(campaign)
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Hello World!"))
+	})
 
-	if err == nil {
-		println("Nenhum erro")
-	} else {
-		validatorErros := err.(validator.ValidationErrors)
+	r.Get("/json", func(w http.ResponseWriter, r *http.Request) {
+		obj := map[string]string{"message": "success"}
+		render.JSON(w, r, obj)
+	})
 
-		for _, v := range validatorErros {
-			println(v.Error())
-		}
-	}
+	r.Post("/products", func(w http.ResponseWriter, r *http.Request) {
+		var product Product
+
+		product.Id = "1"
+		render.DecodeJSON(r.Body, &product)
+		render.JSON(w, r, product)
+	})
+
+	//param
+	// http://localhost:3000/1
+	r.Get("/{idCampaign}", func(w http.ResponseWriter, r *http.Request) {
+		param := chi.URLParam(r, "idCampaign")
+		w.Write([]byte(param))
+	})
+
+	//Query
+	// http://localhost:3000/query?campaign=teste
+	r.Get("/query", func(w http.ResponseWriter, r *http.Request) {
+		query := r.URL.Query().Get("campaign")
+		w.Write([]byte(query))
+	})
+
+	http.ListenAndServe(":3000", r)
+}
+
+func myMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		println("before")
+		next.ServeHTTP(w, r) // cadeia de ações
+		println("after")
+	})
 }
