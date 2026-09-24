@@ -6,6 +6,6 @@ POST http://localhost:3000/campaigns
 
 {
    "name": "Teste",
-   "context" : "teste de context",
+   "content" : "teste de context",
    "emails": ["teste@gmail.com"]
 }

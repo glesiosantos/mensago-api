@@ -18,7 +18,7 @@ func main() {
 	r.Use(middleware.Recoverer)
 
 	service := campaign.Service{
-		Repository: CampaignRepository{},
+		Repository: &campaign.CampaignRepository{},
 	}
 
 	// http://localhost:3000/campaigns
