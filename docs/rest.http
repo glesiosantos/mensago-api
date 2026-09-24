@@ -2,8 +2,10 @@ GET http://localhost:3000/json
 
 ###
 
-POST http://localhost:3000/products
+POST http://localhost:3000/campaigns
 
 {
-    "description": "Mouse"
+   "name": "Teste",
+   "context" : "teste de context",
+   "emails": ["teste@gmail.com"]
 }
